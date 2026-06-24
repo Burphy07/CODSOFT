@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceAI // Vision Engine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-grid"></div>
+    <div class="glow-effect"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand">
+                <i data-lucide="scan-eye" class="brand-icon"></i>
+                <span class="brand-title">FaceAI</span>
+                <span class="brand-separator">//</span>
+                <span class="brand-subtitle">Vision Engine</span>
+            </div>
+            <div class="status-panel">
+                <div class="status-item">
+                    <span class="status-dot online" id="server-status-dot"></span>
+                    <span class="status-text">Server: <strong id="server-status-text">Checking...</strong></span>
+                </div>
+                <div class="status-item">
+                    <i data-lucide="database" class="status-icon"></i>
+                    <span class="status-text">DB: <strong id="db-count-text">0 templates</strong></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main">
+            <!-- SIDE NAVIGATION -->
+            <nav class="side-nav">
+                <button class="nav-btn active" data-tab="tab-detect">
+                    <i data-lucide="scan"></i>
+                    <span>Face Detection</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-recognize">
+                    <i data-lucide="user-check"></i>
+                    <span>Face Recognition</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-register">
+                    <i data-lucide="user-plus"></i>
+                    <span>Register Identity</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-webcam">
+                    <i data-lucide="video"></i>
+                    <span>Live Webcam</span>
+                </button>
+            </nav>
+
+            <!-- CONTENT WINDOW -->
+            <section class="content-window">
+                
+                <!-- TAB: DETECT -->
+                <div class="tab-content active" id="tab-detect">
+                    <div class="grid-2col">
+                        <div class="control-panel card">
+                            <h2>Face Detection</h2>
+                            <p class="description">Detect faces, extract landmarks, and estimate orientations using pre-trained convolutional neural networks (YuNet).</p>
+                            
+                            <div class="settings-group">
+                                <label for="detect-confidence">
+                                    <span>Detection Threshold</span>
+                                    <span class="value-display" id="detect-conf-val">80%</span>
+                                </label>
+                                <input type="range" id="detect-confidence" min="50" max="95" value="80" class="glow-slider">
+                            </div>
+
+                            <div class="upload-zone" id="detect-upload-zone">
+                                <i data-lucide="upload-cloud" class="upload-icon"></i>
+                                <p class="primary-text">Drag & Drop file or click to browse</p>
+                                <p class="secondary-text">Supports JPG, PNG up to 10MB</p>
+                                <input type="file" id="detect-file-input" accept="image/*" class="hidden-input">
+                            </div>
+
+                            <div class="results-meta hidden" id="detect-meta">
+                                <h3>Metadata</h3>
+                                <div class="meta-row">
+                                    <span>Faces Found:</span>
+                                    <strong id="detect-count" class="highlight-text">0</strong>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Resolution:</span>
+                                    <strong id="detect-resolution">0 x 0</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="viewer-panel card">
+                            <div class="viewer-header">
+                                <i data-lucide="eye"></i>
+                                <span>Image Viewer</span>
+                            </div>
+                            <div class="viewer-body">
+                                <div class="canvas-container">
+                                    <canvas id="detect-canvas"></canvas>
+                                    <div class="viewer-placeholder" id="detect-placeholder">
+                                        <i data-lucide="image" class="placeholder-icon"></i>
+                                        <p>No image loaded</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: RECOGNIZE -->
+                <div class="tab-content" id="tab-recognize">
+                    <div class="grid-2col">
+                        <div class="control-panel card">
+                            <h2>Face Recognition</h2>
+                            <p class="description">Compare detected faces against your database of registered identities using a deep-learning SFace feature extractor.</p>
+                            
+                            <div class="settings-group">
+                                <label for="recognize-threshold">
+                                    <span>Matching Threshold (Cosine)</span>
+                                    <span class="value-display" id="recognize-thresh-val">0.36</span>
+                                </label>
+                                <input type="range" id="recognize-threshold" min="20" max="60" value="36" class="glow-slider">
+                            </div>
+
+                            <div class="upload-zone" id="recognize-upload-zone">
+                                <i data-lucide="upload-cloud" class="upload-icon"></i>
+                                <p class="primary-text">Drag & Drop file or click to browse</p>
+                                <p class="secondary-text">Supports JPG, PNG up to 10MB</p>
+                                <input type="file" id="recognize-file-input" accept="image/*" class="hidden-input">
+                            </div>
+
+                            <div class="results-meta hidden" id="recognize-meta">
+                                <h3>Recognition Results</h3>
+                                <div class="matches-list" id="recognize-matches-list">
+                                    <!-- Matches will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="viewer-panel card">
+                            <div class="viewer-header">
+                                <i data-lucide="eye"></i>
+                                <span>Recognition Overlay</span>
+                            </div>
+                            <div class="viewer-body">
+                                <div class="canvas-container">
+                                    <canvas id="recognize-canvas"></canvas>
+                                    <div class="viewer-placeholder" id="recognize-placeholder">
+                                        <i data-lucide="image" class="placeholder-icon"></i>
+                                        <p>No image loaded</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: REGISTER -->
+                <div class="tab-content" id="tab-register">
+                    <div class="grid-2col">
+                        <div class="control-panel card">
+                            <h2>Register Identity</h2>
+                            <p class="description">Upload a clear photo containing a single face and input a name to compute and register their unique face embedding template.</p>
+                            
+                            <form id="register-form">
+                                <div class="input-group">
+                                    <label for="register-name">Full Name</label>
+                                    <input type="text" id="register-name" placeholder="e.g. John Doe" required autocomplete="off">
+                                </div>
+
+                                <div class="upload-zone" id="register-upload-zone">
+                                    <i data-lucide="upload-cloud" class="upload-icon"></i>
+                                    <p class="primary-text" id="register-upload-text">Click or drag profile photo here</p>
+                                    <p class="secondary-text">Image should contain exactly one visible face</p>
+                                    <input type="file" id="register-file-input" accept="image/*" class="hidden-input" required>
+                                </div>
+
+                                <div class="preview-mini hidden" id="register-preview-container">
+                                    <img id="register-preview-img" src="" alt="Preview">
+                                    <button type="button" class="btn-icon btn-danger" id="btn-clear-register-img">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+
+                                <button type="submit" class="btn-primary" id="btn-register-submit">
+                                    <i data-lucide="plus-circle"></i>
+                                    <span>Register Face</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="database-panel card">
+                            <div class="viewer-header">
+                                <i data-lucide="users"></i>
+                                <span>Registered Database</span>
+                            </div>
+                            <div class="db-list-container">
+                                <table class="db-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Identity Name</th>
+                                            <th>Templates</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="db-list-body">
+                                        <tr>
+                                            <td colspan="3" class="empty-table">Loading database...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: WEBCAM -->
+                <div class="tab-content" id="tab-webcam">
+                    <div class="grid-2col">
+                        <div class="control-panel card">
+                            <h2>Live Webcam Analysis</h2>
+                            <p class="description">Run low-latency, real-time face detection and recognition using your webcam streamed directly through WebSockets to the engine.</p>
+                            
+                            <div class="webcam-controls">
+                                <button class="btn-primary btn-success" id="btn-webcam-toggle">
+                                    <i data-lucide="play"></i>
+                                    <span>Start Webcam Stream</span>
+                                </button>
+                                
+                                <div class="checkbox-group">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="webcam-draw-landmarks" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span>Show Bounding Boxes & Facial Landmarks</span>
+                                </div>
+                            </div>
+
+                            <div class="results-meta" id="webcam-meta">
+                                <h3>Recently Recognized</h3>
+                                <div class="recent-detections" id="webcam-log">
+                                    <div class="log-placeholder">
+                                        <i data-lucide="history"></i>
+                                        <span>No activity detected yet. Start the stream.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="viewer-panel card">
+                            <div class="viewer-header">
+                                <i data-lucide="video"></i>
+                                <span>Realtime Stream Overlay</span>
+                                <span class="fps-badge hidden" id="webcam-fps">0 FPS</span>
+                            </div>
+                            <div class="viewer-body">
+                                <div class="canvas-container">
+                                    <!-- Hidden video element to read frames from -->
+                                    <video id="webcam-video" autoplay playsinline class="hidden"></video>
+                                    <canvas id="webcam-canvas"></canvas>
+                                    <div class="viewer-placeholder" id="webcam-placeholder">
+                                        <i data-lucide="camera-off" class="placeholder-icon"></i>
+                                        <p>Stream Inactive</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <!-- NOTIFICATION SYSTEM -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
